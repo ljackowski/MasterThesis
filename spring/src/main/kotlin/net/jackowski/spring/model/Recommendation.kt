@@ -3,11 +3,11 @@ package net.jackowski.spring.model
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 
-@Entity
+//@Entity
 class Recommendation(
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    var id: Short = 0,
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    var id: Int = 0,
 
     @Column(nullable = true, columnDefinition = "TEXT")
     var name: String? = "",

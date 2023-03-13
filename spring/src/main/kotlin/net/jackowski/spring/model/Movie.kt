@@ -1,15 +1,12 @@
 package net.jackowski.spring.model
 
-import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
-import jakarta.persistence.Lob
-import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
-import java.time.LocalDate
+import jakarta.persistence.Table
 
-@Entity
+@Entity(name = "movies")
+@Table(name = "movies")
 class Movie(
     @Id
     var movieId: String = "",
@@ -23,20 +20,20 @@ class Movie(
     @Column(nullable = true, columnDefinition = "TEXT")
     var overview: String? = null,
 
-    @Column(nullable = true)
-    var popularity: Double? = null,
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var popularity: String? = null,
 
-    @Column(nullable = true)
-    var releaseDate: LocalDate? = null,
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var releaseDate: String? = null,
 
-    @Column(nullable = true)
-    var budget: Double? = null,
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var budget: String? = null,
 
-    @Column(nullable = true)
-    var revenue: Double? = null,
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var revenue: String? = null,
 
-    @Column(nullable = true)
-    var runtime: Double? = null,
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var runtime: String? = null,
 
     @Column(nullable = true, columnDefinition = "TEXT")
     var status: String? = null,
@@ -44,11 +41,11 @@ class Movie(
     @Column(nullable = true, columnDefinition = "TEXT")
     var tagline: String? = null,
 
-    @Column(nullable = true)
-    var voteAverage: Double? = null,
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var voteAverage: String? = null,
 
-    @Column(nullable = true)
-    var voteCount: Double? = null,
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var voteCount: String? = null,
 
     @Column(nullable = true, columnDefinition = "TEXT")
     var posterPath: String? = null,
@@ -56,20 +53,25 @@ class Movie(
     @Column(nullable = true, columnDefinition = "TEXT")
     var backdropPath: String? = null,
 
-    @OneToOne(mappedBy = "movieProductionCompany", cascade = [CascadeType.ALL])
-    var productionCompanies: ProductionCompany? = ProductionCompany(),
+    //@OneToOne(mappedBy = "movieProductionCompany", cascade = [CascadeType.ALL])
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var productionCompanies: String? = null,
 
-    @OneToOne(mappedBy = "movieCredit", cascade = [CascadeType.ALL])
-    var credits: Credit? = Credit(),
+    //@OneToOne(mappedBy = "movieCredit", cascade = [CascadeType.ALL])
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var credits: String? = null,
 
-    @OneToOne(mappedBy = "movieKeyword", cascade = [CascadeType.ALL])
-    var keywords: Keyword? = Keyword(),
+    //@OneToOne(mappedBy = "movieKeyword", cascade = [CascadeType.ALL])
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var keywords: String? = null,
 
-    @OneToOne(mappedBy = "movieGenre", cascade = [CascadeType.ALL])
-    var genres: Genre? = Genre(),
+    //@OneToOne(mappedBy = "movieGenre", cascade = [CascadeType.ALL])
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var genres: String? = null,
 
-    @OneToOne(mappedBy = "movieRecommendation", cascade = [CascadeType.ALL])
-    var recommendations: Recommendation? = Recommendation()
+    //@OneToOne(mappedBy = "movieRecommendation", cascade = [CascadeType.ALL])
+    @Column(nullable = true, columnDefinition = "TEXT")
+    var recommendations: String? = ""
 ) {
     override fun toString(): String {
         return "Movie(movieId='$movieId', title='$title', originalLanguage='$originalLanguage', overview='$overview', popularity=$popularity, releaseDate='$releaseDate', budget=$budget, revenue=$revenue, runtime=$runtime, status='$status', tagline='$tagline', voteAverage=$voteAverage, voteCount=$voteCount, posterPath='$posterPath', backdropPath='$backdropPath', productionCompanies=$productionCompanies, credits=$credits, keywords=$keywords, genres=$genres, recommendations=$recommendations)"
@@ -91,10 +93,15 @@ class Movie(
         this.voteCount = null
         this.posterPath = null
         this.backdropPath = null
-        this.productionCompanies?.clearObject()
-        this.credits?.clearObject()
-        this.keywords?.clearObject()
-        this.genres?.clearObject()
-        this.recommendations?.clearObject()
+        this.productionCompanies = null
+        this.credits = null
+        this.keywords = null
+        this.genres = null
+        this.recommendations = null
+        /*        this.productionCompanies?.clearObject()
+                this.credits?.clearObject()
+                this.keywords?.clearObject()
+                this.genres?.clearObject()
+                this.recommendations?.clearObject()*/
     }
 }

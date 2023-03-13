@@ -4,84 +4,74 @@ import com.opencsv.CSVReaderBuilder
 import net.jackowski.spring.model.Movie
 import net.jackowski.spring.util.repository.MovieRepository
 import org.slf4j.LoggerFactory
+import org.springframework.jdbc.core.BeanPropertyRowMapper
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import java.nio.file.Files
 import java.nio.file.Path
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 
 @Service
-class MovieService(private val movieRepository: MovieRepository) {
+class MovieService(private val movieRepository: MovieRepository, private val jdbcTemplate: JdbcTemplate) {
 
     private val logger = LoggerFactory.getLogger("Master Thesis")
 
+    fun getFromQuery(query: String): List<Movie> {
+        return jdbcTemplate.query(query, BeanPropertyRowMapper(Movie::class.java))
+    }
+
+    fun operateOnMovie(query: String): Int {
+        return jdbcTemplate.update(query)
+    }
+
     fun loadMoviesToDatabase() {
-        val resourceFileCSV = System.getProperty("user.dir") + "/spring/movies.csv"
+        val resourceFileCSV = System.getProperty("user.dir") + "/movies.csv"
         try {
             val reader = Files.newBufferedReader(Path.of(resourceFileCSV))
-            val csvReader = CSVReaderBuilder(reader).withSkipLines(1).build()
+            val csvReader = CSVReaderBuilder(reader).withSkipLines(16632).build()
             var line: List<String>
             val movie = Movie()
-            var iterator = 16000
             while ((csvReader.readNext().also { line = it.toList() }) != null) {
+
                 movie.movieId = line[0]
                 movie.title = line[1]
 
-                movie.genres?.name = line[2]
-                movie.genres?.movieGenre = movie
+                movie.genres = line[2]
 
                 movie.originalLanguage = line[3]
                 movie.overview = line[4]
-                movie.popularity = line[5].toDoubleOrNull()
+                movie.popularity = line[5]
 
-                movie.productionCompanies?.name = line[6]
-                movie.productionCompanies?.movieProductionCompany = movie
+                movie.productionCompanies = line[6]
 
-                movie.releaseDate = convertDate(line[7])
-                movie.budget = line[8].toDoubleOrNull()
-                movie.revenue = line[9].toDoubleOrNull()
-                movie.runtime = line[10].toDoubleOrNull()
+                movie.releaseDate = line[7]
+                movie.budget = line[8]
+                movie.revenue = line[9]
+                movie.runtime = line[10]
                 movie.status = line[11]
                 movie.tagline = line[12]
-                movie.voteAverage = line[13].toDoubleOrNull()
-                movie.voteCount = line[14].toDoubleOrNull()
+                movie.voteAverage = line[13]
+                movie.voteCount = line[14]
 
-                movie.credits?.name = line[15]
-                movie.credits?.movieCredit = movie
+                movie.credits = line[15]
 
-                movie.keywords?.name = line[16]
-                movie.keywords?.movieKeyword = movie
+                movie.keywords = line[16]
 
                 movie.posterPath = line[17]
                 movie.backdropPath = line[18]
 
-                movie.recommendations?.name = line[19]
-                movie.recommendations?.movieRecommendation = movie
+                movie.recommendations = line[19]
 
                 movieRepository.save(movie)
 
                 movie.clearObject()
-                iterator++
-                if (iterator >= 100000) {
-                    break
-                } else if(iterator % 300 == 0){
-                    logger.info(iterator.toString())
+                if (csvReader.linesRead.toInt() % 300 == 0) {
+                    logger.info("Lines read: ${csvReader.linesRead}")
+                    logger.info("Records read: ${csvReader.recordsRead}")
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
-
-    private fun convertDate(stringDate: String): LocalDate?{
-        var date: LocalDate? = null
-        try {
-            date = LocalDate.parse(stringDate, DateTimeFormatter.ISO_LOCAL_DATE)
-        } catch (e: DateTimeParseException){
-            return date
-        }
-        return date
     }
 
 
