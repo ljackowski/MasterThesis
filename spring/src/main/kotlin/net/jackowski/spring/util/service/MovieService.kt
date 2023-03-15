@@ -2,6 +2,10 @@ package net.jackowski.spring.util.service
 
 import com.opencsv.CSVReaderBuilder
 import net.jackowski.spring.model.Movie
+import net.jackowski.spring.util.algorithms.AlgorithmType
+import net.jackowski.spring.util.algorithms.BadCharBoyer
+import net.jackowski.spring.util.algorithms.FineAutomata
+import net.jackowski.spring.util.algorithms.Trie
 import net.jackowski.spring.util.repository.MovieRepository
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.BeanPropertyRowMapper
@@ -14,6 +18,23 @@ import java.nio.file.Path
 class MovieService(private val movieRepository: MovieRepository, private val jdbcTemplate: JdbcTemplate) {
 
     private val logger = LoggerFactory.getLogger("Master Thesis")
+
+    fun performAlgorithm(patternToMach: String, algorithmType: String) {
+        when (algorithmType) {
+            AlgorithmType.TRIE.name -> {
+                val trie = Trie()
+            }
+            AlgorithmType.FINE_AUTOMATA.name -> {
+                val fineAutomata = FineAutomata()
+            }
+            AlgorithmType.BAD_CHAR_BOYER.name -> {
+                val badCharBoyer = BadCharBoyer()
+            }
+            else -> {
+
+            }
+        }
+    }
 
     fun getFromQuery(query: String): List<Movie> {
         return jdbcTemplate.query(query, BeanPropertyRowMapper(Movie::class.java))
