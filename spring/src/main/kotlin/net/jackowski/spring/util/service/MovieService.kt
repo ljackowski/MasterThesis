@@ -11,8 +11,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.BeanPropertyRowMapper
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
+import java.io.FileReader
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
 
 @Service
 class MovieService(private val movieRepository: MovieRepository, private val jdbcTemplate: JdbcTemplate) {
@@ -20,18 +22,34 @@ class MovieService(private val movieRepository: MovieRepository, private val jdb
     private val logger = LoggerFactory.getLogger("Master Thesis")
 
     fun performAlgorithm(patternToMach: String, algorithmType: String) {
+        val bytes: ByteArray
+        val patterForMatching: String
         when (algorithmType) {
             AlgorithmType.TRIE.name -> {
                 val trie = Trie()
+                val fileReaderScanner = Scanner(FileReader(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt")).useDelimiter("\\s")
+                var word: String
+                while (fileReaderScanner.hasNext()) {
+                    word = fileReaderScanner.next()
+                    if (word.contains(Regex("[^A-Za-z]"))) word = word.replace(Regex("[^A-Za-z]"), "")
+                    if (word.isNotBlank()) trie.insert(word)
+                }
+                trie.search(patternToMach)
             }
             AlgorithmType.FINE_AUTOMATA.name -> {
                 val fineAutomata = FineAutomata()
+                bytes = Files.readAllBytes(Path.of(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt"))
+                patterForMatching = String(bytes).replace(Regex("[^A-Za-z]"),"")
+                fineAutomata.search(patternToMach, patterForMatching)
             }
             AlgorithmType.BAD_CHAR_BOYER.name -> {
                 val badCharBoyer = BadCharBoyer()
+                bytes = Files.readAllBytes(Path.of(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt"))
+                patterForMatching = String(bytes).replace(Regex("[^A-Za-z]"),"")
+                badCharBoyer.search(patterForMatching, patternToMach)
             }
             else -> {
-
+                logger.warn("Algorithm not specified!")
             }
         }
     }

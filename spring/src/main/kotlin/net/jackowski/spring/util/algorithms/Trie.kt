@@ -5,6 +5,7 @@ class Trie {
     companion object {
         const val ALPHABET_SIZE = 26
     }
+
     private var root: TrieNode? = TrieNode()
 
     // If not present, inserts key into trie
@@ -16,7 +17,7 @@ class Trie {
         var pCrawl = root
         var level: Int = 0
         while (level < length) {
-            index = key[level].code - 'a'.code
+            index = key[level].lowercaseChar().code - 'a'.code
             if (pCrawl!!.children[index] == null) pCrawl.children[index] = TrieNode()
             pCrawl = pCrawl.children[index]
             level++
@@ -63,7 +64,6 @@ fun main() {
     )
     val output = arrayOf("Not present in trie", "Present in trie")
     val trie = Trie()
-
     // Construct trie
     var i: Int = 0
     while (i < keys.size) {
