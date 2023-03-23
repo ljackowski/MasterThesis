@@ -24,7 +24,8 @@ class BadCharBoyer {
 
     /* A pattern searching function that uses Bad
 	Character Heuristic of Boyer Moore Algorithm */
-    fun search(txt: String, pat: String) {
+    fun search(txt: String, pat: String): List<String> {
+        val resultList: MutableList<String> = ArrayList()
         val m = pat.length
         val n = txt.length
         val badChar = IntArray(NO_OF_CHARS)
@@ -45,7 +46,7 @@ class BadCharBoyer {
             /* If the pattern is present at current
 			shift, then index j will become -1 after
 			the above loop */s += if (j < 0) {
-                println("Patterns occur at shift = $s")
+                resultList.add("Patterns occur at shift = $s")
 
                 /* Shift the pattern so that the next
                         character in text aligns with the last
@@ -64,6 +65,7 @@ class BadCharBoyer {
                         is on the right side of the current
                         character. */ max(1, j - badChar[txt[s + j].code])
         }
+        return resultList
     }
 }
 

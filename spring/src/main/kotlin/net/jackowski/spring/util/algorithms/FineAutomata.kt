@@ -57,7 +57,7 @@ class FineAutomata {
     }
 
     /* Prints all occurrences of pat in txt */
-    fun search(pat: String, txt: String) {
+    fun search(pat: String, txt: String): List<String> {
         val m = pat.length
         val n = txt.length
         val tf = Array(m + 1) { IntArray(NO_OF_CHARS) }
@@ -66,11 +66,13 @@ class FineAutomata {
         // Process txt over FA.
         var state = 0
         var i = 0
+        val resultList: MutableList<String> = ArrayList()
         while (i < n) {
             state = tf[state][txt[i].code]
-            if (state == m) println("Pattern found at index ${i - m + 1}")
+            if (state == m) resultList.add("Pattern found at index ${i - m + 1}")
             i++
         }
+        return resultList
     }
 }
 

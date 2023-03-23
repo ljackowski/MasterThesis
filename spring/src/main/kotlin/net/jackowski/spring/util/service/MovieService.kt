@@ -15,17 +15,18 @@ import java.io.FileReader
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
+import kotlin.collections.ArrayList
 
 @Service
 class MovieService(private val movieRepository: MovieRepository, private val jdbcTemplate: JdbcTemplate) {
 
     private val logger = LoggerFactory.getLogger("Master Thesis")
 
-    fun performAlgorithm(patternToMach: String, algorithmType: String) {
+    fun performAlgorithm(patternToSearch: String, algorithmType: String): List<String> {
         val bytes: ByteArray
         val patterForMatching: String
         when (algorithmType) {
-            AlgorithmType.TRIE.name -> {
+            AlgorithmType.TRIE.type -> {
                 val trie = Trie()
                 val fileReaderScanner = Scanner(FileReader(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt")).useDelimiter("\\s")
                 var word: String
@@ -34,22 +35,23 @@ class MovieService(private val movieRepository: MovieRepository, private val jdb
                     if (word.contains(Regex("[^A-Za-z]"))) word = word.replace(Regex("[^A-Za-z]"), "")
                     if (word.isNotBlank()) trie.insert(word)
                 }
-                trie.search(patternToMach)
+                return arrayListOf(trie.search(patternToSearch).toString())
             }
-            AlgorithmType.FINE_AUTOMATA.name -> {
+            AlgorithmType.FINE_AUTOMATA.type -> {
                 val fineAutomata = FineAutomata()
                 bytes = Files.readAllBytes(Path.of(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt"))
                 patterForMatching = String(bytes).replace(Regex("[^A-Za-z]"),"")
-                fineAutomata.search(patternToMach, patterForMatching)
+                return fineAutomata.search(patternToSearch, patterForMatching)
             }
-            AlgorithmType.BAD_CHAR_BOYER.name -> {
+            AlgorithmType.BAD_CHAR_BOYER.type -> {
                 val badCharBoyer = BadCharBoyer()
                 bytes = Files.readAllBytes(Path.of(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt"))
                 patterForMatching = String(bytes).replace(Regex("[^A-Za-z]"),"")
-                badCharBoyer.search(patterForMatching, patternToMach)
+                return badCharBoyer.search(patterForMatching, patternToSearch)
             }
             else -> {
                 logger.warn("Algorithm not specified!")
+                return arrayListOf("Algorithm not specified!")
             }
         }
     }
