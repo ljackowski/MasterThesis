@@ -1,82 +1,29 @@
 package net.jackowski.spring.model
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import java.time.LocalDate
 
-@Entity(name = "movies")
-@Table(name = "movies")
-class Movie(
-    @Id
+data class Movie(
     var movieId: String = "",
-
-    @Column(nullable = true, columnDefinition = "TEXT")
     var title: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
     var originalLanguage: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
     var overview: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var popularity: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var releaseDate: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var budget: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var revenue: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var runtime: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
+    var popularity: Double? = null,
+    var releaseDate: LocalDate? = null,
+    var budget: Double? = null,
+    var revenue: Double? = null,
+    var runtime: Double? = null,
     var status: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
     var tagline: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var voteAverage: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var voteCount: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
+    var voteAverage: Double? = null,
+    var voteCount: Double? = null,
     var posterPath: String? = null,
-
-    @Column(nullable = true, columnDefinition = "TEXT")
     var backdropPath: String? = null,
-
-    //@OneToOne(mappedBy = "movieProductionCompany", cascade = [CascadeType.ALL])
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var productionCompanies: String? = null,
-
-    //@OneToOne(mappedBy = "movieCredit", cascade = [CascadeType.ALL])
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var credits: String? = null,
-
-    //@OneToOne(mappedBy = "movieKeyword", cascade = [CascadeType.ALL])
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var keywords: String? = null,
-
-    //@OneToOne(mappedBy = "movieGenre", cascade = [CascadeType.ALL])
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var genres: String? = null,
-
-    //@OneToOne(mappedBy = "movieRecommendation", cascade = [CascadeType.ALL])
-    @Column(nullable = true, columnDefinition = "TEXT")
-    var recommendations: String? = ""
+    var productionCompanies: List<String>? = null,
+    var credits: List<String>? = null,
+    var keywords: List<String>? = null,
+    var genres: List<String>? = null,
+    var recommendations: List<String>? = null
 ) {
-    override fun toString(): String {
-        return "Movie(movieId='$movieId', title='$title', originalLanguage='$originalLanguage', overview='$overview', popularity=$popularity, releaseDate='$releaseDate', budget=$budget, revenue=$revenue, runtime=$runtime, status='$status', tagline='$tagline', voteAverage=$voteAverage, voteCount=$voteCount, posterPath='$posterPath', backdropPath='$backdropPath', productionCompanies=$productionCompanies, credits=$credits, keywords=$keywords, genres=$genres, recommendations=$recommendations)"
-    }
-
     fun clearObject() {
         this.movieId = ""
         this.title = null
@@ -104,4 +51,5 @@ class Movie(
                 this.genres?.clearObject()
                 this.recommendations?.clearObject()*/
     }
+
 }

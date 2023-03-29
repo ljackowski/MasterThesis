@@ -2,6 +2,7 @@ package net.jackowski.spring.util.service
 
 import com.opencsv.CSVReaderBuilder
 import net.jackowski.spring.model.Movie
+import net.jackowski.spring.model.StringMovie
 import net.jackowski.spring.util.algorithms.AlgorithmType
 import net.jackowski.spring.util.algorithms.BadCharBoyer
 import net.jackowski.spring.util.algorithms.FineAutomata
@@ -14,8 +15,10 @@ import org.springframework.stereotype.Service
 import java.io.FileReader
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.*
-import kotlin.collections.ArrayList
 
 @Service
 class MovieService(private val movieRepository: MovieRepository, private val jdbcTemplate: JdbcTemplate) {
@@ -28,7 +31,10 @@ class MovieService(private val movieRepository: MovieRepository, private val jdb
         when (algorithmType) {
             AlgorithmType.TRIE.type -> {
                 val trie = Trie()
-                val fileReaderScanner = Scanner(FileReader(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt")).useDelimiter("\\s")
+                val fileReaderScanner =
+                    Scanner(FileReader(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt")).useDelimiter(
+                        "\\s"
+                    )
                 var word: String
                 while (fileReaderScanner.hasNext()) {
                     word = fileReaderScanner.next()
@@ -37,18 +43,23 @@ class MovieService(private val movieRepository: MovieRepository, private val jdb
                 }
                 return arrayListOf(trie.search(patternToSearch).toString())
             }
+
             AlgorithmType.FINE_AUTOMATA.type -> {
                 val fineAutomata = FineAutomata()
-                bytes = Files.readAllBytes(Path.of(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt"))
-                patterForMatching = String(bytes).replace(Regex("[^A-Za-z]"),"")
+                bytes =
+                    Files.readAllBytes(Path.of(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt"))
+                patterForMatching = String(bytes).replace(Regex("[^A-Za-z]"), "")
                 return fineAutomata.search(patternToSearch, patterForMatching)
             }
+
             AlgorithmType.BAD_CHAR_BOYER.type -> {
                 val badCharBoyer = BadCharBoyer()
-                bytes = Files.readAllBytes(Path.of(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt"))
-                patterForMatching = String(bytes).replace(Regex("[^A-Za-z]"),"")
+                bytes =
+                    Files.readAllBytes(Path.of(System.getProperty("user.dir") + "/Harry_Potter_Deathly_Hollows.txt"))
+                patterForMatching = String(bytes).replace(Regex("[^A-Za-z]"), "")
                 return badCharBoyer.search(patterForMatching, patternToSearch)
             }
+
             else -> {
                 logger.warn("Algorithm not specified!")
                 return arrayListOf("Algorithm not specified!")
@@ -56,12 +67,37 @@ class MovieService(private val movieRepository: MovieRepository, private val jdb
         }
     }
 
-    fun getFromQuery(query: String): List<Movie> {
-        return jdbcTemplate.query(query, BeanPropertyRowMapper(Movie::class.java))
+    fun getFromQuery(query: String): List<StringMovie> {
+        return jdbcTemplate.query(query, BeanPropertyRowMapper(StringMovie::class.java))
     }
 
-    fun operateOnMovie(query: String): Int {
-        return jdbcTemplate.update(query)
+    fun operateOnMovie(operationType: String, stringMovies: List<StringMovie>): Boolean {
+        val movies = movieRepository.findAll()
+        try {
+            return if (operationType.equals("DELETE", true)) {
+                stringMovies.forEach { stringMovie ->
+                    movies.removeIf { it.movieId == stringMovie.movieId }
+                    movieRepository.delete(stringMovie)
+                }
+                true;
+            } else if (operationType.equals("INSERT INTO", true)) {
+                stringMovies.forEach { stringMovie ->
+                    movies.add(stringMovie)
+                    movieRepository.save(stringMovie)
+                }
+                true;
+            } else if (operationType.equals("UPDATE", true)) {
+                stringMovies.forEach { stringMovie ->
+                    movies[movies.indexOf(movies.find { it.movieId == stringMovie.movieId })] = stringMovie
+                    movieRepository.save(stringMovie)
+                }
+                true;
+            } else {
+                false;
+            }
+        } catch (e: Exception) {
+            return false
+        }
     }
 
     fun loadMoviesToDatabase() {
@@ -70,41 +106,41 @@ class MovieService(private val movieRepository: MovieRepository, private val jdb
             val reader = Files.newBufferedReader(Path.of(resourceFileCSV))
             val csvReader = CSVReaderBuilder(reader).withSkipLines(16632).build()
             var line: List<String>
-            val movie = Movie()
+            val stringMovie = StringMovie()
             while ((csvReader.readNext().also { line = it.toList() }) != null) {
 
-                movie.movieId = line[0]
-                movie.title = line[1]
+                stringMovie.movieId = line[0]
+                stringMovie.title = line[1]
 
-                movie.genres = line[2]
+                stringMovie.genres = line[2]
 
-                movie.originalLanguage = line[3]
-                movie.overview = line[4]
-                movie.popularity = line[5]
+                stringMovie.originalLanguage = line[3]
+                stringMovie.overview = line[4]
+                stringMovie.popularity = line[5]
 
-                movie.productionCompanies = line[6]
+                stringMovie.productionCompanies = line[6]
 
-                movie.releaseDate = line[7]
-                movie.budget = line[8]
-                movie.revenue = line[9]
-                movie.runtime = line[10]
-                movie.status = line[11]
-                movie.tagline = line[12]
-                movie.voteAverage = line[13]
-                movie.voteCount = line[14]
+                stringMovie.releaseDate = line[7]
+                stringMovie.budget = line[8]
+                stringMovie.revenue = line[9]
+                stringMovie.runtime = line[10]
+                stringMovie.status = line[11]
+                stringMovie.tagline = line[12]
+                stringMovie.voteAverage = line[13]
+                stringMovie.voteCount = line[14]
 
-                movie.credits = line[15]
+                stringMovie.credits = line[15]
 
-                movie.keywords = line[16]
+                stringMovie.keywords = line[16]
 
-                movie.posterPath = line[17]
-                movie.backdropPath = line[18]
+                stringMovie.posterPath = line[17]
+                stringMovie.backdropPath = line[18]
 
-                movie.recommendations = line[19]
+                stringMovie.recommendations = line[19]
 
-                movieRepository.save(movie)
+                movieRepository.save(stringMovie)
 
-                movie.clearObject()
+                stringMovie.clearObject()
                 if (csvReader.linesRead.toInt() % 300 == 0) {
                     logger.info("Lines read: ${csvReader.linesRead}")
                     logger.info("Records read: ${csvReader.recordsRead}")
@@ -113,6 +149,47 @@ class MovieService(private val movieRepository: MovieRepository, private val jdb
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+
+    fun convertStringMovieToMovie(stringMovie: StringMovie): Movie {
+        val movie = Movie()
+
+        movie.movieId = stringMovie.movieId
+        movie.title = stringMovie.title
+        movie.originalLanguage = stringMovie.originalLanguage
+        movie.overview = stringMovie.overview
+        movie.posterPath = stringMovie.posterPath
+        movie.backdropPath = stringMovie.backdropPath
+        movie.status = stringMovie.status
+        movie.tagline = stringMovie.tagline
+
+        movie.releaseDate = convertDate(stringMovie.releaseDate)
+
+        movie.popularity = stringMovie.popularity?.toDoubleOrNull()
+        movie.budget = stringMovie.budget?.toDoubleOrNull()
+        movie.revenue = stringMovie.revenue?.toDoubleOrNull()
+        movie.runtime = stringMovie.runtime?.toDoubleOrNull()
+        movie.voteAverage = stringMovie.voteAverage?.toDoubleOrNull()
+        movie.voteCount = stringMovie.voteCount?.toDoubleOrNull()
+
+        movie.genres = stringMovie.genres?.split("-")
+        movie.productionCompanies = stringMovie.productionCompanies?.split("-")
+        movie.credits = stringMovie.credits?.split("-")
+        movie.keywords = stringMovie.keywords?.split("-")
+        movie.recommendations = stringMovie.recommendations?.split("-")
+
+        return movie
+    }
+
+    private fun convertDate(stringDate: String?): LocalDate? {
+        val date: LocalDate?
+        try {
+            date = LocalDate.parse(stringDate, DateTimeFormatter.ISO_LOCAL_DATE)
+        } catch (e: DateTimeParseException) {
+            return null
+        }
+        return date
     }
 
 

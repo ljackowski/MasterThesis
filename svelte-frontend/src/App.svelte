@@ -24,6 +24,20 @@
                         {/each}
                     </div>
                 </div>
+
+                <div class="inner-container">
+                    <textarea v-model="stringMovieToConvert" placeholder="String movie"></textarea>
+                </div>
+                <div class="inner-container">
+                    <select v-model="selectedOperationType">
+                        {#each sqlOperations as operation}
+                            <option>
+                                { operation }
+                            </option>
+                        {/each}
+                    </select>
+                </div>
+                <button on:click="getDataFromDatabase">Operate on movie</button>
             {/if}
 
             {#if showALGORITHMSTESTS}
@@ -44,42 +58,48 @@
                 </div>
             {/if}
 
-            {#if result != undefined}
+            {#if resultData != undefined}
                 <div>
-                    {#if result.testStartDate != undefined}
+                    {#if resultData.testStartDate != undefined}
                         <div v-if="result.testStartDate != undefined">
                             <h4>Start of test: </h4>
-                            <p>{result.testStartDate}</p>
+                            <p>{resultData.testStartDate}</p>
                         </div>
                     {/if}
-                    {#if result.testStopDate != undefined}
+                    {#if resultData.testStopDate != undefined}
                         <div>
                             <h4>End of Test: </h4>
-                            <p>{result.testStopDate}</p>
+                            <p>{resultData.testStopDate}</p>
                         </div>
                     {/if}
-                    {#if result.durationInMilli != undefined}
+                    {#if resultData.durationInMilli != undefined}
                         <div>
                             <h4>Duration: </h4>
-                            <p>{result.durationInMilli}</p>
+                            <p>{resultData.durationInMilli}</p>
                         </div>
                     {/if}
-                    {#if result.operationResult != undefined}
+                    {#if resultData.operationResult != undefined}
                         <div>
                             <h4>Affected rows: </h4>
-                            <p>{result.operationResult}</p>
+                            <p>{resultData.operationResult}</p>
                         </div>
                     {/if}
-                    {#if result.movies != undefined}
+                    {#if resultData.stringMovies != undefined}
                         <div>
                             <h4>Result from SQL: </h4>
-                            <p>{result.movies}</p>
+                            <p>{ resultData.stringMovies }</p>
                         </div>
                     {/if}
-                    {#if result.resultList != undefined}
+                    {#if resultData.movies != undefined}
+                        <div>
+                            <h4>Result from SQL: </h4>
+                            <p>{resultData.movies}</p>
+                        </div>
+                    {/if}
+                    {#if resultData.resultList != undefined}
                         <div>
                             <h4>esult from text search: </h4>
-                            <p>{result.resultList}</p>
+                            <p>{resultData.resultList}</p>
                         </div>
                     {/if}
                 </div>
@@ -93,15 +113,18 @@
 
     export let springAPIURL = "http://localhost:8080/spring-api/"
     export let algorithmTypes = ["Trie", "FineAutomata", "BadCharBoyer"]
-    export let sqlColumnNames = ["id", "title", "original_language", "overview", "popularity", "release_date", "budget", "revenue",
+    export let sqlColumnNames = ["movieId", "title", "original_language", "overview", "popularity", "release_date", "budget", "revenue",
         "runtime", "status", "tagline", "vote_average", "vote_count", "poster_path", "backdrop_path", "production_companies",
-        "credits", "keywords", "genres", "recommendations"]
+        "credits", "keywords", "genres", "recommendations", "id"]
     export let sqlRequest = ""
     export let patternToMatch = ""
     export let selectedAlgorithmType = ""
-    export let result = undefined
+    export let resultData = undefined
     export let showSQLTESTS = true
     export let showALGORITHMSTESTS = false
+    export let stringMovieToConvert: ""
+    export let sqlOperations = ["DELETE", "INSERT INTO", "UPDATE"]
+    export let selectedOperationType = "UPDATE"
 
     function hideSQLTESTS() {
         clearData()
@@ -118,8 +141,10 @@
     function clearData() {
         selectedAlgorithmType = ""
         patternToMatch = ""
-        result = undefined
+        resultData = undefined
         sqlRequest = ""
+        selectedOperationType = ""
+        stringMovieToConvert = ""
     }
 
     function checkAlgorithm() {
@@ -128,7 +153,7 @@
                 patternToSearch: patternToMatch,
                 algorithmType: selectedAlgorithmType
             }
-        }).then(result => result = result.data)
+        }).then(result => resultData = result.data)
     }
 
     function getDataFromDatabase() {
@@ -137,13 +162,14 @@
                 params: {
                     query: sqlRequest
                 }
-            }).then(result => result = result)
+            }).then(result => resultData = result.data)
         } else {
             axios.post(springAPIURL + "operate", {}, {
                 params: {
-                    query: sqlRequest
+                    operationType: this.selectedOperationType,
+                    stringMovies: this.stringMovieToConvert
                 }
-            }).then(result => result = result)
+            }).then(result => resultData = result.data)
         }
     }
 </script>

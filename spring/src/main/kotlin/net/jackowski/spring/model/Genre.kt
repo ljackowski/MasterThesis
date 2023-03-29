@@ -15,7 +15,7 @@ class Genre(
     @OneToOne
     @JoinColumn(name = "movie_genre_id", nullable = true)
     @JsonIgnore
-    var movieGenre: Movie? = null
+    var stringMovieGenre: StringMovie? = null
 ) {
     override fun toString(): String {
         return "Genre(id=$id, name='$name')"
@@ -24,6 +24,6 @@ class Genre(
     fun clearObject() {
         this.id = 0
         this.name = null
-        this.movieGenre = null
+        this.stringMovieGenre = null
     }
 }

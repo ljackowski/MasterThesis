@@ -20,6 +20,18 @@
             {{ sqlColumnName }}
           </div>
         </div>
+
+        <div class="inner-container">
+          <textarea v-model="stringMovieToConvert" placeholder="String movie"></textarea>
+        </div>
+        <div class="inner-container">
+          <select v-model="selectedOperationType">
+            <option v-for="operation in sqlOperations" :value="operation" :key="operation">
+              {{ operation }}
+            </option>
+          </select>
+        </div>
+        <button @click="getDataFromDatabase">Operate on movie</button>
       </div>
 
       <div v-if="showALGORITHMSTESTS">
@@ -53,6 +65,10 @@
           <h4>Affected rows: </h4>
           <p>{{ result.operationResult }}</p>
         </div>
+        <div v-if="result.stringMovies != undefined">
+          <h4>Result from SQL: </h4>
+          <p>{{ result.stringMovies }}</p>
+        </div>
         <div v-if="result.movies != undefined">
           <h4>Result from SQL: </h4>
           <p>{{ result.movies }}</p>
@@ -74,15 +90,18 @@ export default {
     return {
       springAPIURL: "http://localhost:8080/spring-api/",
       algorithmTypes: ["Trie", "FineAutomata", "BadCharBoyer"],
-      sqlColumnNames: ["id", "title", "original_language", "overview", "popularity", "release_date", "budget", "revenue",
+      sqlColumnNames: ["movieId", "title", "original_language", "overview", "popularity", "release_date", "budget", "revenue",
         "runtime", "status", "tagline", "vote_average", "vote_count", "poster_path", "backdrop_path", "production_companies",
-        "credits", "keywords", "genres", "recommendations"],
+        "credits", "keywords", "genres", "recommendations", "id"],
       sqlRequest: "",
       patternToMatch: "",
       selectedAlgorithmType: "",
       result: undefined,
       showSQLTESTS: true,
-      showALGORITHMSTESTS: false
+      showALGORITHMSTESTS: false,
+      stringMovieToConvert: "",
+      sqlOperations: ["DELETE", "INSERT INTO", "UPDATE"],
+      selectedOperationType: "UPDATE"
     }
   },
   methods: {
@@ -101,6 +120,8 @@ export default {
       this.patternToMatch = ""
       this.result = undefined
       this.sqlRequest = ""
+      this.selectedOperationType = ""
+      this.stringMovieToConvert = ""
     },
     checkAlgorithm() {
       axios.get(this.springAPIURL + "get/algorithm", {
@@ -116,13 +137,14 @@ export default {
           params: {
             query: this.sqlRequest
           }
-        }).then(result => this.result = result)
+        }).then(result => this.result = result.data)
       } else {
         axios.post(this.springAPIURL + "operate", {}, {
           params: {
-            query: this.sqlRequest
+            operationType: this.selectedOperationType,
+            stringMovies: this.stringMovieToConvert
           }
-        }).then(result => this.result = result)
+        }).then(result => this.result = result.data)
       }
     }
   }

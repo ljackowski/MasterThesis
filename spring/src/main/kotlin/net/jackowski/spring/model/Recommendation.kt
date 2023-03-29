@@ -15,7 +15,7 @@ class Recommendation(
     @OneToOne
     @JoinColumn(name = "movie_recommendation_id", nullable = true)
     @JsonIgnore
-    var movieRecommendation: Movie? = null
+    var stringMovieRecommendation: StringMovie? = null
 ) {
     override fun toString(): String {
         return "Recommendation(id=$id, name='$name')"
@@ -24,6 +24,6 @@ class Recommendation(
     fun clearObject() {
         this.id = 0
         this.name = null
-        this.movieRecommendation = null
+        this.stringMovieRecommendation = null
     }
 }

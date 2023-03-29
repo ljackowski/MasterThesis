@@ -15,7 +15,7 @@ class Keyword(
     @OneToOne
     @JoinColumn(name = "movie_keyword_id", nullable = true)
     @JsonIgnore
-    var movieKeyword: Movie? = null
+    var stringMovieKeyword: StringMovie? = null
 ) {
     override fun toString(): String {
         return "Keyword(id=$id, name='$name')"
@@ -24,6 +24,6 @@ class Keyword(
     fun clearObject() {
         this.id = 0
         this.name = null
-        this.movieKeyword = null
+        this.stringMovieKeyword = null
     }
 }

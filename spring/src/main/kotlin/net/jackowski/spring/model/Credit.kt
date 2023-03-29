@@ -15,7 +15,7 @@ class Credit(
     @OneToOne
     @JoinColumn(name = "movie_credit_id", nullable = true)
     @JsonIgnore
-    var movieCredit: Movie? = null
+    var stringMovieCredit: StringMovie? = null
 ) {
     override fun toString(): String {
         return "Credit(id=$id, name='$name')"
@@ -24,6 +24,6 @@ class Credit(
     fun clearObject() {
         this.id = 0
         this.name = null
-        this.movieCredit = null
+        this.stringMovieCredit = null
     }
 }

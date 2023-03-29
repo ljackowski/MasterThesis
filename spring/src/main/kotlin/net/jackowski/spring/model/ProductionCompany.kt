@@ -15,7 +15,7 @@ class ProductionCompany(
     @OneToOne
     @JoinColumn(name = "movie_production_company_id", nullable = true)
     @JsonIgnore
-    var movieProductionCompany: Movie? = null
+    var stringMovieProductionCompany: StringMovie? = null
 ) {
     override fun toString(): String {
         return "ProductionCompany(id=$id, name='$name')"
@@ -24,6 +24,6 @@ class ProductionCompany(
     fun clearObject() {
         this.id = 0
         this.name = null
-        this.movieProductionCompany = null
+        this.stringMovieProductionCompany = null
     }
 }
