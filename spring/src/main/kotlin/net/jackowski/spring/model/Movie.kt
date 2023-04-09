@@ -45,11 +45,6 @@ data class Movie(
         this.keywords = null
         this.genres = null
         this.recommendations = null
-        /*        this.productionCompanies?.clearObject()
-                this.credits?.clearObject()
-                this.keywords?.clearObject()
-                this.genres?.clearObject()
-                this.recommendations?.clearObject()*/
     }
 
 }
