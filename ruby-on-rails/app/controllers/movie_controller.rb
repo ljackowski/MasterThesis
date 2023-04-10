@@ -1,35 +1,56 @@
 class MovieController < ApplicationController
   def get_test
-    @start = DateTime.now
-    @string_movies = StringMovie.limit(5)
-    @movies_array = []
-    @string_movies.each { |string_movie|
-      @movies_array.push(string_movie.convert_string_to_typed)
+    start = DateTime.now
+    string_movies = StringMovie.limit(5)
+    movies_array = []
+    string_movies.each { |string_movie|
+      movies_array.push(string_movie.convert_string_to_typed)
     }
-    @stop = DateTime.now
+    stop = DateTime.now
 
-    @test_result = TestResult.new
-    @test_result.testStartDate = @start.to_s
-    @test_result.testStopDate = @stop.to_s
-    @test_result.durationInMilli = (@stop.to_time - @start.to_time).in_milliseconds
-    @test_result.movies = @movies_array
-    @test_result.stringMovies = @string_movies
+    test_result = TestResult.new
+    test_result.testStartDate = start.to_s
+    test_result.testStopDate = stop.to_s
+    test_result.durationInMilli = (stop.to_time - start.to_time).in_milliseconds
+    test_result.movies = movies_array
+    test_result.stringMovies = string_movies
 
-    render json: @test_result, status: :ok
+    render json: test_result, status: :ok
   end
 
   def operate_on_movie
-    @test2 = "[{ \"movieId\": \"135397\", \"title\": \"Jurassic World\", \"originalLanguage\": \"en\", \"overview\": \"Twenty-two years after the events of Jurassic Park Isla Nublar now features a fully functioning dinosaur theme park Jurassic World as originally envisioned by John Hammond.\", \"popularity\": \"99.327\", \"releaseDate\": \"2015-06-12\", \"budget\": \"150000000.0\", \"revenue\": \"1671537444.0\", \"runtime\": \"124.0\", \"status\": \"Released\", \"tagline\": \"The park is open.\", \"voteAverage\": \"6.678\", \"voteCount\": \"18835.0\", \"posterPath\": \"/A0LZHXUzo5C60Oahvt7VxvwuzHw.jpg\", \"backdropPath\": \"/aIGIYJTyOkEVUmEd3z5x6diYsFx.jpg\", \"productionCompanies\": \"Universal Pictures-Amblin Entertainment\", \"credits\": \"Chris Pratt-Bryce Dallas Howard-Ty Simpkins-Nick Robinson-Vincent D'Onofrio-BD Wong-Omar Sy-Jake Johnson-Irrfan Khan-Judy Greer-Lauren Lapkus-Brian Tee-Katie McGrath-Andy Buckley-Eric Edelstein-Courtney J. Clark-Colby Boothman-Jimmy Fallon-James DuMont-Matt Burke-Anna Talakkottur-Matthew Cardarople-Michael Papajohn-William Gary Smith-Kelly Washington-Isaac Keys-Patrick Crowley-Chad Randall-Gary Weeks-Bill Ogilvie-Allan Tam-Yvonne Angulo-Chloe Perrin-Timothy Eulich-Kevin Foster-Bonnie Wild-Brad Bird-Colin Trevorrow-Justin Lacalamita-Tiffany Forest-Arlene Newman-Tait Fletcher-Jimmy Buffett-Tim Connolly-Johnny Otto-Erika Erica-Brandon Marc Higa-Martin Klebba-Eddie J. Fernandez\", \"keywords\": \"dna-tyrannosaurus rex-velociraptor-island-animal attack-primal fear-sequel-disaster-escape-dinosaur-creature-park-amusement park-theme park-genetic engineering-raptor-animal horror\", \"genres\": \"Action-Adventure-Science Fiction-Thriller\", \"recommendations\": \"351286-331-329-99861-330-76341-102899-118340-87101-140607-131631-198663-293660-122917-271110-150540-207703-168259-254128-286217-127585\" }]"
-    @test_result = operate("test", @test2)
-    render json: @test_result, status: :ok
+    start = DateTime.now
+    result = operate(params[:operationType], params[:stringMovies])
+    stop = DateTime.now
+    test_result = TestResult.new
+    test_result.testStartDate = start.to_s
+    test_result.testStopDate = stop.to_s
+    test_result.durationInMilli = (stop.to_time - start.to_time).in_milliseconds
+    test_result.operationResult = result
+    render json: test_result, status: :ok
   end
 
+  def check_algorithm
+    start = DateTime.now
+    result = operate(params[:operationType], params[:stringMovies])
+    stop = DateTime.now
+    test_result = TestResult.new
+    test_result.testStartDate = start.to_s
+    test_result.testStopDate = stop.to_s
+    test_result.durationInMilli = (stop.to_time - start.to_time).in_milliseconds
+    test_result.resultList = result
+    render json: test_result, status: :ok
+  end
 
   private
+
   require 'json'
+
   def operate(operation_type, string_movies)
     json_string_movies = JSON.parse(string_movies)
-    movie_array = []
+    movies_table = StringMovie.all
+    movies_array = movies_table.to_a
+    movies_for_operate = []
     json_string_movies.each do |json_string_movie|
       movie = StringMovie.new
       movie.id = json_string_movie["id"]
@@ -53,15 +74,76 @@ class MovieController < ApplicationController
       movie.keywords = json_string_movie["keywords"]
       movie.genres = json_string_movie["genres"]
       movie.recommendations = json_string_movie["recommendations"]
-      movie_array.push(movie)
+      movies_for_operate.push(movie)
     end
 
-    movie_array.each do |movie|
-
+    if "DELETE".casecmp(operation_type) == 0
+      movies_for_operate.each do |string_movie_for_operate|
+        movies_array.delete_if { |string_movie| string_movie_for_operate.movie_id == string_movie.movie_id }
+        string_movie_to_destroy = StringMovie.where(movie_id: string_movie_for_operate.movie_id).first
+        if string_movie_to_destroy != nil
+          string_movie_to_destroy.destroy
+        end
+      end
+      return true
+    elsif "UPDATE".casecmp(operation_type) == 0
+      movies_for_operate.each do |string_movie_for_operate|
+        movies_array = movies_array.map { |string_movie_| string_movie_.movie_id == string_movie_for_operate.movie_id ? string_movie_for_operate : string_movie_ }
+        StringMovie.update(string_movie_for_operate.id,
+                           :movie_id => string_movie_for_operate.movie_id,
+                           :title => string_movie_for_operate.title,
+                           :original_language => string_movie_for_operate.original_language,
+                           :overview => string_movie_for_operate.overview,
+                           :popularity => string_movie_for_operate.popularity,
+                           :release_date => string_movie_for_operate.release_date,
+                           :budget => string_movie_for_operate.budget,
+                           :revenue => string_movie_for_operate.revenue,
+                           :runtime => string_movie_for_operate.runtime,
+                           :status => string_movie_for_operate.status,
+                           :tagline => string_movie_for_operate.tagline,
+                           :vote_average => string_movie_for_operate.vote_average,
+                           :vote_count => string_movie_for_operate.vote_count,
+                           :poster_path => string_movie_for_operate.poster_path,
+                           :backdrop_path => string_movie_for_operate.backdrop_path,
+                           :production_companies => string_movie_for_operate.production_companies,
+                           :credits => string_movie_for_operate.credits,
+                           :keywords => string_movie_for_operate.keywords,
+                           :genres => string_movie_for_operate.genres,
+                           :recommendations => string_movie_for_operate.recommendations
+        )
+      end
+      return true
+    elsif "INSERT INTO".casecmp(operation_type) == 0
+      movies_for_operate.each do |string_movie_for_operate|
+        movies_array.push(string_movie_for_operate)
+        StringMovie.new(:id => string_movie_for_operate.id,
+                        :movie_id => string_movie_for_operate.movie_id,
+                        :title => string_movie_for_operate.title,
+                        :original_language => string_movie_for_operate.original_language,
+                        :overview => string_movie_for_operate.overview,
+                        :popularity => string_movie_for_operate.popularity,
+                        :release_date => string_movie_for_operate.release_date,
+                        :budget => string_movie_for_operate.budget,
+                        :revenue => string_movie_for_operate.revenue,
+                        :runtime => string_movie_for_operate.runtime,
+                        :status => string_movie_for_operate.status,
+                        :tagline => string_movie_for_operate.tagline,
+                        :vote_average => string_movie_for_operate.vote_average,
+                        :vote_count => string_movie_for_operate.vote_count,
+                        :poster_path => string_movie_for_operate.poster_path,
+                        :backdrop_path => string_movie_for_operate.backdrop_path,
+                        :production_companies => string_movie_for_operate.production_companies,
+                        :credits => string_movie_for_operate.credits,
+                        :keywords => string_movie_for_operate.keywords,
+                        :genres => string_movie_for_operate.genres,
+                        :recommendations => string_movie_for_operate.recommendations).save
+      end
+      return true
     end
-
-
-    movie_array
+    false
   end
 
+  def perform_algorithm
+
+  end
 end

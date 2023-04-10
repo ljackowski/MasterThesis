@@ -1,5 +1,6 @@
 class StringMovie < ApplicationRecord
   self.table_name = "movies"
+  self.primary_key = :id
 
   def convert_string_to_typed
     @movie = Movie.new

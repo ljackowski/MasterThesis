@@ -70,9 +70,10 @@ class BadCharBoyer {
 }
 
 /* Driver program to test above function */
+/*
 fun main() {
     val txt = "ABAAABCD"
     val pat = "ABC"
     val b = BadCharBoyer()
     b.search(txt, pat)
-}
+}*/

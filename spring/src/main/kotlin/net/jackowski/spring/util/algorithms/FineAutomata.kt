@@ -77,9 +77,10 @@ class FineAutomata {
 }
 
 // Driver code
+/*
 fun main() {
     val pat = "AABAACAADAABAAABAA"
     val txt = "AABA"
     val f = FineAutomata()
     f.search(txt, pat)
-}
+}*/

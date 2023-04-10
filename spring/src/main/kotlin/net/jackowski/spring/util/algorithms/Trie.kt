@@ -56,6 +56,7 @@ class Trie {
     }
 }
 
+/*
 fun main() {
     // Input keys (use only 'a' through 'z' and lower case)
     val keys = arrayOf(
@@ -76,4 +77,4 @@ fun main() {
     if (trie.search("these")) println("these --- " + output[1]) else println("these --- " + output[0])
     if (trie.search("their")) println("their --- " + output[1]) else println("their --- " + output[0])
     if (trie.search("thaw")) println("thaw --- " + output[1]) else println("thaw --- " + output[0])
-}
+}*/
