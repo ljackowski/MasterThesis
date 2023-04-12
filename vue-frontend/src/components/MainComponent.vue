@@ -4,6 +4,10 @@
       <button @click="hideSQLTESTS">SQL TESTS</button>
       <button @click="hideALGORITHMSSTESTS">ALGORITHMS TESTS</button>
     </div>
+    <div>
+      <label for="rails-api">Enable Rails Api: </label>
+      <input type="radio" name="rails-api" id="rails-api" v-model="isRails">
+    </div>
     <div class="test-block">
       <div v-if="showSQLTESTS">
         <div class="inner-container">
@@ -89,6 +93,8 @@ export default {
   data() {
     return {
       springAPIURL: "http://localhost:8080/spring-api/",
+      railsAPRIURL: "http://localhost:3000/rails-api/",
+      isRails: false,
       algorithmTypes: ["Trie", "FineAutomata", "BadCharBoyer"],
       sqlColumnNames: ["movieId", "title", "original_language", "overview", "popularity", "release_date", "budget", "revenue",
         "runtime", "status", "tagline", "vote_average", "vote_count", "poster_path", "backdrop_path", "production_companies",
@@ -124,27 +130,53 @@ export default {
       this.stringMovieToConvert = ""
     },
     checkAlgorithm() {
-      axios.get(this.springAPIURL + "get/algorithm", {
-        params: {
-          patternToSearch: this.patternToMatch,
-          algorithmType: this.selectedAlgorithmType
-        }
-      }).then(result => this.result = result.data)
-    },
-    getDataFromDatabase() {
-      if (this.sqlRequest.toLowerCase().includes("select")) {
-        axios.get(this.springAPIURL + "get", {
+      if (this.isRails) {
+        axios.get(this.railsAPRIURL + "get/algorithm", {
           params: {
-            query: this.sqlRequest
+            patternToSearch: this.patternToMatch,
+            algorithmType: this.selectedAlgorithmType
           }
         }).then(result => this.result = result.data)
       } else {
-        axios.post(this.springAPIURL + "operate", {}, {
+        axios.get(this.springAPIURL + "get/algorithm", {
           params: {
-            operationType: this.selectedOperationType,
-            stringMovies: this.stringMovieToConvert
+            patternToSearch: this.patternToMatch,
+            algorithmType: this.selectedAlgorithmType
           }
         }).then(result => this.result = result.data)
+      }
+    },
+    getDataFromDatabase() {
+      if (this.isRails) {
+        if (this.sqlRequest.toLowerCase().includes("select")) {
+          axios.get(this.railsAPRIURL + "get", {
+            params: {
+              query: this.sqlRequest
+            }
+          }).then(result => this.result = result.data)
+        } else {
+          axios.post(this.railsAPRIURL + "operate", {}, {
+            params: {
+              operationType: this.selectedOperationType,
+              stringMovies: this.stringMovieToConvert
+            }
+          }).then(result => this.result = result.data)
+        }
+      } else {
+        if (this.sqlRequest.toLowerCase().includes("select")) {
+          axios.get(this.springAPIURL + "get", {
+            params: {
+              query: this.sqlRequest
+            }
+          }).then(result => this.result = result.data)
+        } else {
+          axios.post(this.springAPIURL + "operate", {}, {
+            params: {
+              operationType: this.selectedOperationType,
+              stringMovies: this.stringMovieToConvert
+            }
+          }).then(result => this.result = result.data)
+        }
       }
     }
   }

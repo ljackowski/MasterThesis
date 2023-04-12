@@ -37,8 +37,8 @@ class MovieController(private val movieService: MovieService) {
 
     @GetMapping("get")
     fun getTest(@RequestParam query: String): TestResult {
-        val start = Instant.now()
         val result = movieService.getFromQuery(query)
+        val start = Instant.now()
         val movies: MutableList<Movie> = ArrayList()
         result.forEach {
             movies.add(movieService.convertStringMovieToMovie(it))
