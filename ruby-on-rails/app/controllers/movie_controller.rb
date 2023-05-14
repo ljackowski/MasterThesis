@@ -1,13 +1,9 @@
 class MovieController < ApplicationController
   def get_test
+    string_movies = ActiveRecord::Base.connection.execute(params[:query])
     start = DateTime.now
-    string_movies = StringMovie.limit(5)
-    movies_array = []
-    string_movies.each { |string_movie|
-      movies_array.push(string_movie.convert_string_to_typed)
-    }
+    movies_array = convert_string_to_typed(string_movies)
     stop = DateTime.now
-
     test_result = TestResult.new
     test_result.testStartDate = start.to_s
     test_result.testStopDate = stop.to_s
@@ -45,6 +41,35 @@ class MovieController < ApplicationController
   private
 
   require 'json'
+
+  def convert_string_to_typed(string_movies)
+    movies = []
+    string_movies.each do |string_movie|
+      movie = Movie.new
+      movie.movie_id = string_movie["movie_id"]
+      movie.title = string_movie["title"]
+      movie.original_language = string_movie["original_language"]
+      movie.overview = string_movie["overview"]
+      movie.popularity = string_movie["popularity"].to_f rescue nil
+      movie.release_date = DateTime.parse(string_movie["release_date"]) rescue nil
+      movie.budget = string_movie["budget"].to_f rescue nil
+      movie.revenue = string_movie["revenue"].to_f rescue nil
+      movie.runtime = string_movie["runtime"].to_f rescue nil
+      movie.status = string_movie["status"]
+      movie.tagline = string_movie["tagline"]
+      movie.vote_average = string_movie["vote_average"].to_f rescue nil
+      movie.vote_count = string_movie["vote_count"].to_f rescue nil
+      movie.poster_path = string_movie["poster_path"]
+      movie.backdrop_path = string_movie["backdrop_path"]
+      movie.production_companies = string_movie["production_companies"].split("-") rescue nil
+      movie.credits = string_movie["credits"].split("-") rescue nil
+      movie.keywords = string_movie["keywords"].split("-") rescue nil
+      movie.genres = string_movie["genres"].split("-") rescue nil
+      movie.recommendations = string_movie["recommendations"].split("-") rescue nil
+      movies.push(movie)
+    end
+    movies
+  end
 
   def perform_algorithm(pattern_to_search, algorithm_type)
     result = []
