@@ -14,10 +14,13 @@ class TrieNode
 end
 
 class Trie
-  @alphabet_size = 26
-  @root = ''
 
-  def self.insert(key)
+  def initialize(alphabet_size)
+    @alphabet_size = alphabet_size
+    @root = TrieNode.new(alphabet_size)
+  end
+
+  def insert(key)
     length = key.length
     p_crawl = @root
     level = 0
@@ -32,7 +35,7 @@ class Trie
     p_crawl.isEndOfWord = true
   end
 
-  def self.search(key)
+  def search(key)
     length = key.length
     p_crawl = @root
     level = 0
@@ -47,14 +50,16 @@ class Trie
     (p_crawl.isEndOfWord)
   end
 
-  def self.main
+=begin
+  def main
     keys = ["the", "a", "there", "answer", "any", "by", "bye", "their"]
     output = ["Not present in trie", "Present in trie"]
-    @root = TrieNode.new(@alphabet_size)
-    ALGORITHM_TYPE.
+
+    root = TrieNode.new(26)
+    trie = Trie.new(26, root)
     i = 0
     while i < keys.length
-      self.insert(keys[i])
+      trie.insert(keys[i])
       i += 1
     end
     if self.search("the") == true
@@ -78,4 +83,5 @@ class Trie
       print("thaw --- " + output[0],"\n")
     end
   end
+=end
 end

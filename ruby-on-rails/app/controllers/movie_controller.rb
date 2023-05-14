@@ -32,7 +32,7 @@ class MovieController < ApplicationController
 
   def check_algorithm
     start = DateTime.now
-    result = operate(params[:operationType], params[:stringMovies])
+    result = perform_algorithm(params[:patternToSearch], params[:algorithmType])
     stop = DateTime.now
     test_result = TestResult.new
     test_result.testStartDate = start.to_s
@@ -45,6 +45,33 @@ class MovieController < ApplicationController
   private
 
   require 'json'
+
+  def perform_algorithm(pattern_to_search, algorithm_type)
+    result = []
+    if algorithm_type == "Trie"
+      trie = Trie.new(26)
+      File.read("../Harry_Potter_Deathly_Hollows.txt").gsub(/[^A-Za-z]/, " ").split(" ").each do |word|
+        unless word.to_s.strip.empty?
+          trie.insert(word.downcase)
+        end
+      end
+      result = [trie.search(pattern_to_search).to_s]
+    end
+
+    if algorithm_type == "FineAutomata"
+      fine_automata = FineAutomata.new(256)
+      pattern_for_matching = File.read("../Harry_Potter_Deathly_Hollows.txt").gsub(/[^A-Za-z]/, " ").downcase.chars
+      return fine_automata.search(pattern_to_search, pattern_for_matching)
+    end
+
+    if algorithm_type == "BadCharBoyer"
+      bad_char_boyer = BadCharBoyer.new(256)
+      pattern_for_matching = File.read("../Harry_Potter_Deathly_Hollows.txt").gsub(/[^A-Za-z]/, " ").downcase.chars
+      result = bad_char_boyer.search(pattern_for_matching, pattern_to_search)
+    end
+
+    result
+  end
 
   def operate(operation_type, string_movies)
     json_string_movies = JSON.parse(string_movies)
@@ -141,9 +168,5 @@ class MovieController < ApplicationController
       return true
     end
     false
-  end
-
-  def perform_algorithm
-
   end
 end

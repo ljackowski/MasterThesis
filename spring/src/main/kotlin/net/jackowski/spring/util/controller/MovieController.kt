@@ -1,5 +1,6 @@
 package net.jackowski.spring.util.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import net.jackowski.spring.model.Movie

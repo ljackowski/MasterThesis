@@ -6,7 +6,7 @@
     </div>
     <div>
       <label for="rails-api">Enable Rails Api: </label>
-      <input type="radio" name="rails-api" id="rails-api" v-model="isRails">
+      <input type="checkbox" name="rails-api" id="rails-api" v-model="isRails">
     </div>
     <div class="test-block">
       <div v-if="showSQLTESTS">
@@ -24,7 +24,6 @@
             {{ sqlColumnName }}
           </div>
         </div>
-
         <div class="inner-container">
           <textarea v-model="stringMovieToConvert" placeholder="String movie"></textarea>
         </div>
@@ -70,11 +69,11 @@
           <p>{{ result.operationResult }}</p>
         </div>
         <div v-if="result.stringMovies != undefined">
-          <h4>Result from SQL: </h4>
+          <h4>String movies: </h4>
           <p>{{ result.stringMovies }}</p>
         </div>
         <div v-if="result.movies != undefined">
-          <h4>Result from SQL: </h4>
+          <h4>Movies: </h4>
           <p>{{ result.movies }}</p>
         </div>
         <div v-if="result.resultList != undefined">
