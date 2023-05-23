@@ -9,104 +9,36 @@
       <input type="checkbox" name="rails-api" id="rails-api" v-model="isRails">
     </div>
     <div class="test-block">
-      <div v-if="showSQLTESTS">
-        <div class="inner-container">
-          <textarea v-model="sqlRequest" placeholder="Enter sql operation"></textarea>
-        </div>
-        <div class="inner-container">
-          <h3>SQL statement: </h3>
-          {{ sqlRequest }}
-        </div>
-        <button @click="getDataFromDatabase">Get</button>
-        <div class="inner-container">
-          <h3>Column Names</h3>
-          <div v-for="sqlColumnName in sqlColumnNames" :key="sqlColumnName" class="inner-container">
-            {{ sqlColumnName }}
-          </div>
-        </div>
-        <div class="inner-container">
-          <textarea v-model="stringMovieToConvert" placeholder="String movie"></textarea>
-        </div>
-        <div class="inner-container">
-          <select v-model="selectedOperationType">
-            <option v-for="operation in sqlOperations" :value="operation" :key="operation">
-              {{ operation }}
-            </option>
-          </select>
-        </div>
-        <button @click="getDataFromDatabase">Operate on movie</button>
-      </div>
-
-      <div v-if="showALGORITHMSTESTS">
-        <div>
-          <label for="pattern-to-match">Pattern to match</label>
-          <input v-model="patternToMatch" id="pattern-to-match">
-          <label for="selected-algorithm-type">Search algorithm</label>
-          <input v-model="selectedAlgorithmType" id="selected-algorithm-type">
-          <button @click="checkAlgorithm">Check</button>
-        </div>
-        <h3>Algorithms</h3>
-        <div v-for="algorithmType in algorithmTypes" :key="algorithmType" class="inner-container">
-          {{ algorithmType }}
-        </div>
-      </div>
-
-      <div v-if="result != undefined">
-        <div v-if="result.testStartDate != undefined">
-          <h4>Start of test: </h4>
-          <p>{{ result.testStartDate }}</p>
-        </div>
-        <div v-if="result.testStopDate != undefined">
-          <h4>End of Test: </h4>
-          <p>{{ result.testStopDate }}</p>
-        </div>
-        <div v-if="result.durationInMilli != undefined">
-          <h4>Duration: </h4>
-          <p>{{ result.durationInMilli }}</p>
-        </div>
-        <div v-if="result.operationResult != undefined">
-          <h4>Affected rows: </h4>
-          <p>{{ result.operationResult }}</p>
-        </div>
-        <div v-if="result.stringMovies != undefined">
-          <h4>String movies: </h4>
-          <p>{{ result.stringMovies }}</p>
-        </div>
-        <div v-if="result.movies != undefined">
-          <h4>Movies: </h4>
-          <p>{{ result.movies }}</p>
-        </div>
-        <div v-if="result.resultList != undefined">
-          <h4>Result from text search: </h4>
-          <p>{{ result.resultList }}</p>
-        </div>
-      </div>
+      <APITests :is-rails="isRails" :sqlColumnNames="sqlColumnNames" :algorithm-types="algorithmTypes"
+                :sql-operations="sqlOperations" :get-result="getResult" :show-a-l-g-o-r-i-t-h-m-s-t-e-s-t-s="showALGORITHMSTESTS" :show-s-q-l-t-e-s-t-s="showSQLTESTS"/>
+      <ResultsTests :result="result"/>
     </div>
+
+    <ImagesTests/>
   </div>
 </template>
 
 <script>
-import axios from "axios";
-
+import APITests from "@/components/API-Tests.vue";
+import ResultsTests from "@/components/Results-Tests.vue";
+import ImagesTests from "@/components/Images-Tests.vue";
 export default {
+  components: {
+    APITests,
+    ResultsTests,
+    ImagesTests
+  },
   data() {
     return {
-      springAPIURL: "http://localhost:8080/spring-api/",
-      railsAPRIURL: "http://localhost:3000/rails-api/",
       isRails: false,
       algorithmTypes: ["Trie", "FineAutomata", "BadCharBoyer"],
       sqlColumnNames: ["movieId", "title", "original_language", "overview", "popularity", "release_date", "budget", "revenue",
         "runtime", "status", "tagline", "vote_average", "vote_count", "poster_path", "backdrop_path", "production_companies",
         "credits", "keywords", "genres", "recommendations", "id"],
-      sqlRequest: "",
-      patternToMatch: "",
-      selectedAlgorithmType: "",
+      sqlOperations: ["DELETE", "INSERT INTO", "UPDATE"],
       result: undefined,
       showSQLTESTS: true,
       showALGORITHMSTESTS: false,
-      stringMovieToConvert: "",
-      sqlOperations: ["DELETE", "INSERT INTO", "UPDATE"],
-      selectedOperationType: "UPDATE"
     }
   },
   methods: {
@@ -128,61 +60,18 @@ export default {
       this.selectedOperationType = ""
       this.stringMovieToConvert = ""
     },
-    checkAlgorithm() {
-      if (this.isRails) {
-        axios.get(this.railsAPRIURL + "get/algorithm", {
-          params: {
-            patternToSearch: this.patternToMatch,
-            algorithmType: this.selectedAlgorithmType
-          }
-        }).then(result => this.result = result.data)
-      } else {
-        axios.get(this.springAPIURL + "get/algorithm", {
-          params: {
-            patternToSearch: this.patternToMatch,
-            algorithmType: this.selectedAlgorithmType
-          }
-        }).then(result => this.result = result.data)
-      }
-    },
-    getDataFromDatabase() {
-      if (this.isRails) {
-        if (this.sqlRequest.toLowerCase().includes("select")) {
-          axios.get(this.railsAPRIURL + "get", {
-            params: {
-              query: this.sqlRequest
-            }
-          }).then(result => this.result = result.data)
-        } else {
-          axios.post(this.railsAPRIURL + "operate", {}, {
-            params: {
-              operationType: this.selectedOperationType,
-              stringMovies: this.stringMovieToConvert
-            }
-          }).then(result => this.result = result.data)
-        }
-      } else {
-        if (this.sqlRequest.toLowerCase().includes("select")) {
-          axios.get(this.springAPIURL + "get", {
-            params: {
-              query: this.sqlRequest
-            }
-          }).then(result => this.result = result.data)
-        } else {
-          axios.post(this.springAPIURL + "operate", {}, {
-            params: {
-              operationType: this.selectedOperationType,
-              stringMovies: this.stringMovieToConvert
-            }
-          }).then(result => this.result = result.data)
-        }
-      }
+    getResult(result) {
+      this.result = result
     }
   }
 }
 </script>
 
-<style scoped>
+<style>
+body{
+  background: rgb(255,255,255);
+  background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(206,30,240,1) 34%, rgba(29,79,203,1) 84%);
+}
 .container {
   padding-left: 10px;
 }
